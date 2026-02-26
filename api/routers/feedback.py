@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from fastapi import APIRouter, HTTPException
@@ -68,11 +69,23 @@ async def stream_feedback(request: FeedbackRequest):
     frames = _normalize_frames(request)
 
     async def event_generator():
-        async for item in stream_all_feedback(
+        stream = stream_all_feedback(
             persona_ids=request.personas,
             frames=frames,
             context=request.context,
-        ):
+        )
+        stream_iter = stream.__aiter__()
+        done = False
+        while not done:
+            try:
+                item = await asyncio.wait_for(stream_iter.__anext__(), timeout=15.0)
+            except TimeoutError:
+                yield ": keepalive\n\n"
+                continue
+            except StopAsyncIteration:
+                done = True
+                break
+
             if isinstance(item, PersonaFeedback):
                 logger.debug("SSE: persona {pid} complete", pid=item.persona)
                 yield f"data: {item.model_dump_json()}\n\n"
