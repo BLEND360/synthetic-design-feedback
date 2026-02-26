@@ -344,7 +344,7 @@ tests/
 ## Key Constraints
 
 - **Figma sandbox**: only the UI thread (`ui.html`) can make network calls. The main thread (`code.ts`) can only talk to the UI via `postMessage`. All HTTP requests originate from `ui.html`.
-- **Network allowlist**: domains must be in `manifest.json` > `networkAccess.allowedDomains`. Currently allows `*.ngrok-free.app` and `*.ngrok-free.dev` (local dev tunnels). Add your production domain here when deploying.
+- **Network allowlist**: domains must be in `manifest.json` > `networkAccess.allowedDomains`. Currently allows `*.demo.blend360.app` (production), `*.ngrok-free.app`, and `*.ngrok-free.dev` (local dev tunnels).
 - **Document access**: `documentAccess: "dynamic-page"` in manifest — required for `getMainComponentAsync()`.
 - **pydantic-ai Agent**: uses `output_type=PersonaFeedback` for structured output. Model configurable via `MODEL_NAME` env var (default: `openai-responses:gpt-5`). Uses OpenAI Responses API via pydantic-ai's `OpenAIResponsesModel`. Use `gpt-5-mini` for faster/cheaper results at the cost of annotation precision.
 - **Inline vision**: images passed inline as `BinaryContent(data=jpeg_bytes, media_type='image/jpeg')` — no temp files needed.
@@ -391,13 +391,26 @@ Coverage reports are generated automatically (configured in `pyproject.toml` add
 
 ## Deployment
 
-A `Dockerfile` is included for production deployment. The image runs uvicorn on port 8000 and
-requires `OPENAI_API_KEY` and optionally `API_KEY` as environment variables.
+**Production URL:** `https://design-feedback.demo.blend360.app`
 
+**Infrastructure code:** [`BLEND360/ai-demos`](https://github.com/BLEND360/ai-demos) repo, `apps/design-feedback/`.
+Uses Pulumi (Python) with the `deploy_things` library to deploy as an ECS Fargate service behind the shared ALB.
+
+**Key details:**
+- ECS Fargate, 256 CPU / 512 MB memory
+- Host-header routing via `hub.subdomain("design-feedback").target("/")`
+- No Cognito SSO — API key auth at the application level
+- Secrets stored as Pulumi encrypted config: `OPENAI_API_KEY`, `API_KEY`
+- Docker image built from this repo's `Dockerfile` via `LocalImage` + `GitHubRepo`
+
+**Retrieve the API key after deployment:**
 ```bash
-docker build -t synthetic-studio .
-docker run -p 8000:8000 -e OPENAI_API_KEY=sk-... -e API_KEY=your-key synthetic-studio
+cd ../ai-demos/apps/design-feedback
+pulumi stack output api_key --show-secrets
 ```
 
-When deploying, add your production domain to `figma-plugin/manifest.json` > `networkAccess.allowedDomains`
-so the plugin can reach the backend.
+**Redeploy after code changes:**
+```bash
+cd ../ai-demos/apps/design-feedback
+pulumi up --stack prod
+```

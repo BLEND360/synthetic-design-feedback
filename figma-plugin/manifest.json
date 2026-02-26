@@ -9,6 +9,6 @@
   "editorType": ["figma"],
   "ui": "ui.html",
   "networkAccess": {
-    "allowedDomains": ["https://*.ngrok-free.app", "https://*.ngrok-free.dev"]
+    "allowedDomains": ["https://*.ngrok-free.app", "https://*.ngrok-free.dev", "https://*.demo.blend360.app"]
   }
 }

@@ -6,6 +6,10 @@ A Figma plugin that sends design screenshots to AI personas for instant, multi-p
 
 ## Getting Started
 
+The plugin connects to a hosted backend at `https://design-feedback.demo.blend360.app`. You need an API key to use it.
+
+**To get an API key**, contact Vincent Yan <vincent.yan@blend360.com>.
+
 ### Install the Plugin
 
 1. Open **Figma Desktop** (the browser version won't work)
@@ -15,9 +19,9 @@ A Figma plugin that sends design screenshots to AI personas for instant, multi-p
 
 ### Use the Plugin
 
-1. Start the backend (see [Local Development](#local-development) below)
-2. Right-click on the canvas > **Plugins** > **Development** > **Synthetic Studio**
-3. Enter the backend URL and click **Connect**
+1. Right-click on the canvas > **Plugins** > **Development** > **Synthetic Studio**
+2. Enter the backend URL: `https://design-feedback.demo.blend360.app`
+3. Enter your API key and click **Connect**
 4. Select one or more frames, choose which AI personas you want feedback from
 5. Click **Get Feedback** — results stream in as each persona finishes (1-3 minutes total)
 
@@ -41,8 +45,8 @@ Screenshots are preprocessed with a coordinate grid overlay to improve spatial a
 
 | Setting | Where | Default |
 |---|---|---|
-| Backend URL | Plugin UI | Your backend URL (ngrok or production) |
-| API Key | Plugin UI | Required when `API_KEY` env var is set on backend |
+| Backend URL | Plugin UI | `https://design-feedback.demo.blend360.app` |
+| API Key | Plugin UI | Required (contact Vincent Yan for access) |
 | Personas | Plugin UI checkboxes | All 5 selected |
 | Designer context | Plugin UI text area | Optional free text |
 | `MODEL_NAME` | Backend env var | `openai-responses:gpt-5` |
@@ -129,12 +133,11 @@ Dockerfile                   # Multi-stage build: python:3.13-slim + uv
 
 ## Deployment
 
-A `Dockerfile` is included for production deployment:
+**Production URL:** `https://design-feedback.demo.blend360.app`
 
-```bash
-docker build -t synthetic-studio .
-docker run -p 8000:8000 -e OPENAI_API_KEY=sk-... -e API_KEY=your-key synthetic-studio
-```
+**Infrastructure:** ECS Fargate behind a shared ALB, deployed via Pulumi. Infrastructure code lives in the [`BLEND360/ai-demos`](https://github.com/BLEND360/ai-demos) repo under `apps/design-feedback/`.
 
-Set `API_KEY` to enable authentication. When deploying, add your production domain to
-`figma-plugin/manifest.json` > `networkAccess.allowedDomains`.
+- 256 CPU / 512 MB memory
+- API key authentication (no Cognito SSO)
+- OpenAI API key and application API key stored as Pulumi encrypted secrets
+- Docker image built from this repo's `Dockerfile`
