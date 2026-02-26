@@ -1,4 +1,4 @@
-# Synthetic Design Feedback
+# Synthetic Studio
 
 ## User Persona
 
@@ -201,7 +201,7 @@ Tell them the full absolute path to `figma-plugin/manifest.json` so they can fin
 
 > "Great! Now let's use the plugin:
 >
-> 1. In Figma, right-click on the canvas → **Plugins** → **Development** → **Synthetic Design Feedback**
+> 1. In Figma, right-click on the canvas → **Plugins** → **Development** → **Synthetic Studio**
 > 2. The plugin panel will open. Paste this URL into the **Backend URL** field:
 >    `<the ngrok URL from step 8>` and click **Connect**
 > 3. Once connected, the available personas will load. Select one or more frames in your design,
@@ -303,7 +303,7 @@ personas/
 └── *.json                       # Add new personas as JSON files here
 
 figma-plugin/
-├── manifest.json            # Plugin ID, documentAccess: dynamic-page, allowed ngrok domains
+├── manifest.json            # Plugin ID, documentAccess: dynamic-page, allowed network domains
 ├── code.ts → code.js        # Main thread — selection listener, JPEG export, metadata extraction
 ├── ui.html                  # UI thread — connect flow, persona picker, SSE client, annotation overlay renderer
 ├── biome.json               # Biome v2 config — TS/HTML/CSS linting + formatting
@@ -342,7 +342,7 @@ tests/
 ## Key Constraints
 
 - **Figma sandbox**: only the UI thread (`ui.html`) can make network calls. The main thread (`code.ts`) can only talk to the UI via `postMessage`. All HTTP requests originate from `ui.html`.
-- **Network allowlist**: domains must be in `manifest.json` > `networkAccess.allowedDomains`. Currently allows `*.ngrok-free.app`, `*.ngrok-free.dev`, and `*.demo.blend360.app`.
+- **Network allowlist**: domains must be in `manifest.json` > `networkAccess.allowedDomains`. Currently allows `*.demo.blend360.app` (production), `*.ngrok-free.app`, and `*.ngrok-free.dev` (local dev tunnels).
 - **Document access**: `documentAccess: "dynamic-page"` in manifest — required for `getMainComponentAsync()`.
 - **pydantic-ai Agent**: uses `output_type=PersonaFeedback` for structured output. Model configurable via `MODEL_NAME` env var (default: `openai-responses:gpt-5`). Uses OpenAI Responses API via pydantic-ai's `OpenAIResponsesModel`. Use `gpt-5-mini` for faster/cheaper results at the cost of annotation precision.
 - **Inline vision**: images passed inline as `BinaryContent(data=jpeg_bytes, media_type='image/jpeg')` — no temp files needed.
