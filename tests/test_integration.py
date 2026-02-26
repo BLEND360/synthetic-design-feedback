@@ -5,6 +5,9 @@ from httpx import ASGITransport, AsyncClient
 
 from api.main import app
 from api.models.response import PersonaFeedback
+from tests import TEST_API_KEY
+
+API_KEY_HEADER = {"X-API-Key": TEST_API_KEY}
 
 # Minimal valid 1x1 PNG as base64
 TINY_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
@@ -109,6 +112,7 @@ async def test_full_feedback_flow(mock_agent_run):
                 "personas": ["first_time_user"],
                 "context": "A test page",
             },
+            headers=API_KEY_HEADER,
         )
 
     assert resp.status_code == 200
@@ -146,6 +150,7 @@ async def test_multi_frame_flow(mock_agent_flow):
                 "personas": ["first_time_user"],
                 "context": "Login to dashboard flow",
             },
+            headers=API_KEY_HEADER,
         )
 
     assert resp.status_code == 200

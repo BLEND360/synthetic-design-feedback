@@ -1,9 +1,14 @@
 figma.showUI(__html__, { width: 560, height: 600 });
 
-// Send saved backend URL to UI on startup
+// Send saved backend URL and API key to UI on startup
 figma.clientStorage.getAsync("backendUrl").then((url) => {
   if (url) {
     figma.ui.postMessage({ type: "saved-backend-url", url });
+  }
+});
+figma.clientStorage.getAsync("apiKey").then((key) => {
+  if (key) {
+    figma.ui.postMessage({ type: "saved-api-key", key });
   }
 });
 
@@ -114,13 +119,18 @@ function toHex(value: number): string {
 }
 
 // Handle messages from UI
-figma.ui.onmessage = async (msg: { type: string; width?: number; height?: number; url?: string }) => {
+figma.ui.onmessage = async (msg: { type: string; width?: number; height?: number; url?: string; key?: string }) => {
   if (msg.type === "resize") {
     figma.ui.resize(msg.width ?? 560, msg.height ?? 600);
     return;
   }
   if (msg.type === "save-backend-url") {
     figma.clientStorage.setAsync("backendUrl", msg.url);
+  }
+  if (msg.type === "save-api-key") {
+    if (msg.key) {
+      figma.clientStorage.setAsync("apiKey", msg.key);
+    }
   }
   if (msg.type === "export-selection") {
     const selection = figma.currentPage.selection;

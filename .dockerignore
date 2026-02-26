@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+.venv
+__pycache__
+*.pyc
+figma-plugin/
+tests/
+docs/
+*.md
+.pre-commit-config.yaml
+.ruff_cache/
+coverage.xml
+node_modules/

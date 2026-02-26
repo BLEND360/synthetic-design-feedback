@@ -9,10 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 figma.showUI(__html__, { width: 560, height: 600 });
-// Send saved backend URL to UI on startup
+// Send saved backend URL and API key to UI on startup
 figma.clientStorage.getAsync("backendUrl").then((url) => {
     if (url) {
         figma.ui.postMessage({ type: "saved-backend-url", url });
+    }
+});
+figma.clientStorage.getAsync("apiKey").then((key) => {
+    if (key) {
+        figma.ui.postMessage({ type: "saved-api-key", key });
     }
 });
 // Listen for selection changes
@@ -120,6 +125,11 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
     }
     if (msg.type === "save-backend-url") {
         figma.clientStorage.setAsync("backendUrl", msg.url);
+    }
+    if (msg.type === "save-api-key") {
+        if (msg.key) {
+            figma.clientStorage.setAsync("apiKey", msg.key);
+        }
     }
     if (msg.type === "export-selection") {
         const selection = figma.currentPage.selection;
